@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppDemo", "ConsoleAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualizationHelper", "VisualizationHelper\VisualizationHelper.csproj", "{CC503ECF-5911-46FF-A8B9-119399E99FE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsAppDemo", "WindowsFormsAppDemo\WindowsFormsAppDemo.csproj", "{ABB774B9-0B6C-4BCF-9297-4405282A1873}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{CC503ECF-5911-46FF-A8B9-119399E99FE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC503ECF-5911-46FF-A8B9-119399E99FE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC503ECF-5911-46FF-A8B9-119399E99FE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABB774B9-0B6C-4BCF-9297-4405282A1873}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABB774B9-0B6C-4BCF-9297-4405282A1873}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABB774B9-0B6C-4BCF-9297-4405282A1873}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABB774B9-0B6C-4BCF-9297-4405282A1873}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

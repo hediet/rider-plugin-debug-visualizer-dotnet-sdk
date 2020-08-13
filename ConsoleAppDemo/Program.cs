@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,10 +12,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ConsoleAppDemo
 {
-    
     class Program
     {
         static void Main(string[] args)
+        {
+            PlotlyDemo();
+            LinkedListDemo();
+            ListDemo();
+            AstDemo();
+        }
+
+        static void PlotlyDemo()
         {
             var numbers = new List<double>();
             var plot = new PlotlyPlotData() {Y = numbers};
@@ -23,16 +31,38 @@ namespace ConsoleAppDemo
             {
                 numbers.Add(Math.Sin(i));
             }
-            
+        }
+
+        static void LinkedListDemo()
+        {
             var list = new LinkedList<int>();
             // visualize `list.Visualize()` here!
             list.Append(1);
             list.Append(2);
             list.Append(3);
             list.Append(4);
+        }
 
-            
-            const string programText = @"using System;
+        static void ListDemo()
+        {
+            var data = new ListData();
+
+            for (var i = 0; i < 100000; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    data.Items.Add(new Dictionary<string, object>() {["name"] = "John Doe", ["y"] = Math.Sin(i)});
+                }
+                else
+                {
+                    data.Items.Add(new Dictionary<string, object>() {["name"] = "Jane doe", ["y"] = Math.Sin(i)});
+                }
+            }
+        }
+
+        static void AstDemo()
+        {
+            string programText = @"using System;
 using System.Collections;
 using System.Linq;
 using System.Text;
@@ -48,52 +78,108 @@ namespace HelloWorld
     }
 }";
 
+            var src = string.Join(",", Enumerable.Repeat(programText, 1));
+
             DataExtractor.MainDataExtractor.DataExtractors.Add(new RoslynDataExtractor());
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(programText);
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(src);
+
+            var root = tree.GetRoot();
+            foreach (var n in root.DescendantNodes())
+            {
+                //var x = DataExtractor.Extract(n).Parse().ExtractedData.Data.ToString();
+            }
         }
     }
 
-    class RoslynDataExtractor : GenericDataExtractor<SyntaxTree>
-    {
-        public override void GetExtractions(SyntaxTree value, IDataExtractorContext context)
-        {
-            context.AddExtraction(
-                () => new Ast(GetNode(value.GetRoot()), value.GetText().ToString()),
-                new DataExtractorInfo("roslyn.SyntaxTree", "Roslyn Syntax Tree", 1000)
-            );
-        }
 
-        private TreeNode<AstData> GetNode(SyntaxNodeOrToken node)
+    internal class RoslynDataExtractor : IDataExtractor
+    {
+        public void GetExtractions(object? value, IDataExtractorContext context)
         {
-            string? id = null;
-            if (node.Parent != null)
+            if (value is SyntaxTree tree)
             {
-                var type = node.Parent.GetType();
-                foreach (var m in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    var val = m.GetValue(node.Parent);
-                    if (val == node.AsNode() || node.AsToken().Equals(val))
-                    {
-                        id = m.Name;
-                        break;
-                    }
-                }
+                value = tree.GetRoot();
             }
 
-            var result = new TreeNode<AstData>(node.Kind().ToString())
+            if (value is SyntaxNode node)
             {
-                Data = new AstData() {Position = node.Span.Start, Length = node.Span.Length},
-                Children = node.ChildNodesAndTokens().Select(GetNode).ToList(),
-                Id = id
+                var root = node;
+                while (root.Parent != null)
+                {
+                    root = root.Parent;
+                }
+
+                context.AddExtraction(
+                    () => new Ast(GetNode(root, node, false), root.GetText().ToString()) {FileName = "code.cs"},
+                    new DataExtractorInfo("roslyn.SyntaxTree", "Roslyn Syntax Tree", 1000)
+                );
+                context.AddExtraction(
+                    () => new Ast(GetNode(root, node, true), root.GetText().ToString()) {FileName = "code.cs"},
+                    new DataExtractorInfo("roslyn.SyntaxTreeWithTokens", "Roslyn Syntax Tree With Tokens", 900)
+                );
+            }
+        }
+
+        private static AstTreeNode GetNode(SyntaxNodeOrToken node, SyntaxNode? marked, bool includeTokens)
+        {
+            static bool AreEqual(object? obj1, SyntaxNodeOrToken obj2)
+            {
+                return obj2.IsNode && obj1 == obj2.AsNode() || obj2.IsToken && obj2.AsToken().Equals(obj1);
+            }
+
+            string? propName = null;
+            if (node.Parent != null)
+            {
+                var properties = node.Parent.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                propName = properties.Select(propertyInfo =>
+                {
+                    var propertyVal = propertyInfo.GetValue(node.Parent);
+                    if (AreEqual(propertyVal, node)) return propertyInfo.Name;
+                    if (propertyVal is IEnumerable e)
+                    {
+                        var idx = 0;
+                        foreach (var c in e)
+                        {
+                            if (AreEqual(c, node)) return $"{propertyInfo.Name}[{idx}]";
+                            idx++;
+                        }
+                    }
+
+                    return null;
+                }).FirstOrDefault(n => n != null);
+            }
+
+            var result = new AstTreeNode(new AstSpan {Start = node.Span.Start, Length = node.Span.Length})
+            {
+                Children =
+                    (includeTokens ? node.ChildNodesAndTokens() : node.ChildNodesAndTokens().Where(t => t.IsNode))
+                    .Select(n => GetNode(n, marked, includeTokens)).ToList(),
+                IsMarked = node == marked,
+                Segment = "." + propName
             };
 
+            var kindName = node.Kind().ToString();
+            if (propName != null)
+            {
+                result.Items.Add(StyledTreeNodeItem.Style1(propName));
+                result.Items.Add(StyledTreeNodeItem.Unstyled($": {kindName}"));
+            }
+            else
+            {
+                result.Items.Add(StyledTreeNodeItem.Unstyled(kindName));
+            }
 
             if (node.AsNode() is IdentifierNameSyntax s)
             {
-                result.Value = s.Identifier.ValueText;
+                result.Items.Add(StyledTreeNodeItem.Style2(s.Identifier.ValueText));
             }
-            
-            
+
+            if (node.AsNode() is PredefinedTypeSyntax s2)
+            {
+                result.Items.Add(StyledTreeNodeItem.Style2(s2.Keyword.Text));
+            }
+
+
             return result;
         }
     }
@@ -130,7 +216,7 @@ namespace HelloWorld
                 cur.Next = new Node(item);
             }
         }
-        
+
         string GetVisualizationData()
         {
             var list = new Node(default(T)!) {Next = this.Head};

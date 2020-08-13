@@ -25,29 +25,35 @@ namespace DebugVisualizer.DataExtraction
         public static JsonString<DataExtractionResult> Extract(object? value,
             string? optionsJson = null)
         {
-            
-                
-            var options = optionsJson != null
-                ? JsonString.FromJson<DataExtractionOptions>(optionsJson).Parse()
-                : new DataExtractionOptions(null);
+            try
+            {
 
-            var context = new DataExtractorContext(new List<Extraction>(), MainDataExtractor);
-            var extractions = context.GetExtractions(value)
-                .OrderByDescending(e => e.ExtractorInfo.Priority)
-                .ToList();
+                var options = optionsJson != null
+                    ? JsonString.FromJson<DataExtractionOptions>(optionsJson).Parse()
+                    : new DataExtractionOptions(null);
 
-            var extraction = extractions.FirstOrDefault(e => e.ExtractorInfo.Id == options.PreferredDataExtractorId) ??
-                             extractions.FirstOrDefault();
+                var context = new DataExtractorContext(new List<Extraction>(), MainDataExtractor);
+                var extractions = context.GetExtractions(value)
+                    .OrderByDescending(e => e.ExtractorInfo.Priority)
+                    .ToList();
 
-            var extractedData = extraction != null
-                ? new ExtractedData(extraction.ExtractorInfo.Id, extraction.GetVisualizationData())
-                : null;
-            
-            Console.WriteLine(extractedData?.DataExtractorId);
+                var extraction =
+                    extractions.FirstOrDefault(e => e.ExtractorInfo.Id == options.PreferredDataExtractorId) ??
+                    extractions.FirstOrDefault();
 
-            return JsonString.FromValue(
-                new DataExtractionResult(extractedData, extractions.Select(e => e.ExtractorInfo).ToList())
-            );
+                var extractedData = extraction != null
+                    ? new ExtractedData(extraction.ExtractorInfo.Id, extraction.GetVisualizationData())
+                    : null;
+
+
+                return JsonString.FromValue(
+                    new DataExtractionResult(extractedData, extractions.Select(e => e.ExtractorInfo).ToList())
+                );
+            }
+            catch (Exception e)
+            {
+                return JsonString.FromValue(DataExtractionResult.FromVisualizationData(new TextData(e.ToString())));
+            }
         }
     }
 }

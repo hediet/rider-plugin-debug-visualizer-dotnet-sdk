@@ -4,7 +4,7 @@ namespace DebugVisualizer.DataExtraction.Data
 {
     public sealed class Ast : VisualizationData
     {
-        public Ast(TreeNode<AstData> root, string text)
+        public Ast(AstTreeNode root, string text)
         {
             Root = root;
             Text = text;
@@ -13,15 +13,29 @@ namespace DebugVisualizer.DataExtraction.Data
         public override string[] Tags => new[] {"tree", "text", "ast"};
 
         [JsonProperty("root")]
-        public TreeNode<AstData> Root { get; set; }
+        public AstTreeNode Root { get; set; }
         
         [JsonProperty("text")]
         public string Text { get; set; }
+        
+        [JsonProperty("fileName")]
+        public string FileName { get; set; }
     }
     
-    public sealed class AstData
+    public sealed class AstTreeNode : BaseTreeNode<AstTreeNode>
     {
-        [JsonProperty("position")] public int Position { get; set; }
+        public AstTreeNode(AstSpan span)
+        {
+            Span = span;
+        }
+        
+        [JsonProperty("span")]
+        private AstSpan Span { get; set; }
+    }
+
+    public sealed class AstSpan
+    {
+        [JsonProperty("start")] public int Start { get; set; }
         [JsonProperty("length")] public int Length { get; set; }
     }
 }
