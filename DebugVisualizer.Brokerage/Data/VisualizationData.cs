@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using DebugVisualizer.DataExtraction.Extractors;
+using DebugVisualizer.Brokerage.Brokers;
 using Newtonsoft.Json;
 
-namespace DebugVisualizer.DataExtraction.Data
+namespace DebugVisualizer.Brokerage.Data
 {
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public abstract class VisualizationData

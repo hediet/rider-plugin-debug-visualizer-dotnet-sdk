@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DebugVisualizer.DataExtraction;
-using DebugVisualizer.DataExtraction.Data;
-using DebugVisualizer.DataExtraction.Extractors;
+using DebugVisualizer.Brokerage;
+using DebugVisualizer.Brokerage.Data;
+using DebugVisualizer.Brokerage.Brokers;
 
 namespace WindowsFormsAppDemo
 {
@@ -21,8 +21,8 @@ namespace WindowsFormsAppDemo
         {
             InitializeComponent();
 
-            DataExtractor.MainDataExtractor.DataExtractors.Add(new BitmapDataExtractor());
-            DataExtractor.MainDataExtractor.DataExtractors.Add(new ControlDataExtractor());
+            VisualizationBrokerService.MainVisualizationBroker.DataExtractors.Add(new BitmapVisualizationBroker());
+            VisualizationBrokerService.MainVisualizationBroker.DataExtractors.Add(new ControlVisualizationBroker());
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -49,11 +49,11 @@ namespace WindowsFormsAppDemo
         }
     }
 
-    public class ControlDataExtractor : GenericDataExtractor<Control>
+    public class ControlVisualizationBroker : GenericVisualizationBroker<Control>
     {
-        public override void GetExtractions(Control control, IDataExtractorContext context)
+        public override void GetExtractions(Control control, IVisualizationBrokerContext context)
         {
-            context.AddExtraction(() =>
+            context.Add(() =>
             {
                 var root = control;
                 while (root.Parent != null)
@@ -69,11 +69,11 @@ namespace WindowsFormsAppDemo
                 windowBitmapGraphics.DrawRectangle(new Pen(Brushes.Red, 3),
                     new Rectangle(controlLocationRelativeToRoot + rootLocationRelativeToWindow, control.ClientSize));
 
-                return BitmapDataExtractor.GetPngImageDataFromBitmap(windowBitmap);
-            }, new DataExtractorInfo("control-tree", "Control Tree", 1500));
+                return BitmapVisualizationBroker.GetPngImageDataFromBitmap(windowBitmap);
+            }, new VisualizationBrokerInfo("control-tree", "Control Tree", 1500));
 
-            context.AddExtraction(() => BitmapDataExtractor.GetPngImageDataFromBitmap(DrawControl(control)),
-                new DataExtractorInfo("control", "Control", 1000));
+            context.Add(() => BitmapVisualizationBroker.GetPngImageDataFromBitmap(DrawControl(control)),
+                new VisualizationBrokerInfo("control", "Control", 1000));
         }
 
         private static Bitmap DrawControl(Control control)
@@ -85,12 +85,12 @@ namespace WindowsFormsAppDemo
         }
     }
 
-    public class BitmapDataExtractor : GenericDataExtractor<Bitmap>
+    public class BitmapVisualizationBroker : GenericVisualizationBroker<Bitmap>
     {
-        public override void GetExtractions(Bitmap value, IDataExtractorContext context)
+        public override void GetExtractions(Bitmap value, IVisualizationBrokerContext context)
         {
-            context.AddExtraction(() => GetPngImageDataFromBitmap(value),
-                new DataExtractorInfo("bitmap-png", "Bitmap PNG", 1000));
+            context.Add(() => GetPngImageDataFromBitmap(value),
+                new VisualizationBrokerInfo("bitmap-png", "Bitmap PNG", 1000));
         }
 
         public static PngImageData GetPngImageDataFromBitmap(Bitmap bitmap)

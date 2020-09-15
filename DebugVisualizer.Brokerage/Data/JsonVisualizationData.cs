@@ -4,7 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DebugVisualizer.DataExtraction.Data
+namespace DebugVisualizer.Brokerage.Data
 {
     [JsonConverter(typeof(JsonVisualizationDataConverter))]
     public class JsonVisualizationData : VisualizationData

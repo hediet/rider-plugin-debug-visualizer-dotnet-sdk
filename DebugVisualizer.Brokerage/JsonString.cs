@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DebugVisualizer.DataExtraction
+namespace DebugVisualizer.Brokerage
 {
     public static class JsonString
     {
@@ -11,7 +11,7 @@ namespace DebugVisualizer.DataExtraction
 
         public static JsonString<T> FromJson<T>(string json)
         {
-            return new JsonString<T>(false, default(T), json);
+            return new JsonString<T>(false, default, json);
         }
     }
     

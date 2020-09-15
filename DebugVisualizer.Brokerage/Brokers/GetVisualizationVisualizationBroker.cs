@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using DebugVisualizer.DataExtraction.Data;
+using DebugVisualizer.Brokerage.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DebugVisualizer.DataExtraction.Extractors
+namespace DebugVisualizer.Brokerage.Brokers
 {
     public interface IVisualizable
     {
         public object GetVisualizationData();
     }
 
-    class GetVisualizationDataExtractor : IDataExtractor
+    class GetVisualizationVisualizationBroker : IVisualizationBroker
     {
-        public void GetExtractions(object? value, IDataExtractorContext context)
+        public void Broker(object? value, IVisualizationBrokerContext context)
         {
             if (value == null)
             {
@@ -40,13 +40,13 @@ namespace DebugVisualizer.DataExtraction.Extractors
                 return;
             }
 
-            foreach (var extraction in context.GetExtractions(result))
+            foreach (var extraction in context.Broker(result))
             {
-                context.AddExtraction(
+                context.Add(
                     extraction.GetVisualizationData,
-                    new DataExtractorInfo($"GetVisualizationData-{extraction.ExtractorInfo.Id}",
-                        $"GetVisualizationData ({extraction.ExtractorInfo.Name})",
-                        1000 + extraction.ExtractorInfo.Priority)
+                    new VisualizationBrokerInfo($"GetVisualizationData-{extraction.BrokerInfo.Id}",
+                        $"GetVisualizationData ({extraction.BrokerInfo.Name})",
+                        1000 + extraction.BrokerInfo.Priority)
                 );
             }
         }

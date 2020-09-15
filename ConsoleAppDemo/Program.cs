@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DebugVisualizer.DataExtraction;
-using DebugVisualizer.DataExtraction.Data;
-using DebugVisualizer.DataExtraction.Extractors;
+using DebugVisualizer.Brokerage;
+using DebugVisualizer.Brokerage.Data;
+using DebugVisualizer.Brokerage.Brokers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -80,7 +80,7 @@ namespace HelloWorld
 
             var src = string.Join(",", Enumerable.Repeat(programText, 1));
 
-            DataExtractor.MainDataExtractor.DataExtractors.Add(new RoslynDataExtractor());
+            VisualizationBrokerService.MainVisualizationBroker.DataExtractors.Add(new RoslynVisualizationBroker());
             SyntaxTree tree = CSharpSyntaxTree.ParseText(src);
 
             var root = tree.GetRoot();
@@ -92,9 +92,9 @@ namespace HelloWorld
     }
 
 
-    internal class RoslynDataExtractor : IDataExtractor
+    internal class RoslynVisualizationBroker : IVisualizationBroker
     {
-        public void GetExtractions(object? value, IDataExtractorContext context)
+        public void Broker(object? value, IVisualizationBrokerContext context)
         {
             if (value is SyntaxTree tree)
             {
@@ -109,13 +109,13 @@ namespace HelloWorld
                     root = root.Parent;
                 }
 
-                context.AddExtraction(
-                    () => new Ast(GetNode(root, node, false), root.GetText().ToString()) {FileName = "code.cs"},
-                    new DataExtractorInfo("roslyn.SyntaxTree", "Roslyn Syntax Tree", 1000)
+                context.Add(
+                    () => new AstData(GetNode(root, node, false), root.GetText().ToString()) {FileName = "code.cs"},
+                    new VisualizationBrokerInfo("roslyn.SyntaxTree", "Roslyn Syntax Tree", 1000)
                 );
-                context.AddExtraction(
-                    () => new Ast(GetNode(root, node, true), root.GetText().ToString()) {FileName = "code.cs"},
-                    new DataExtractorInfo("roslyn.SyntaxTreeWithTokens", "Roslyn Syntax Tree With Tokens", 900)
+                context.Add(
+                    () => new AstData(GetNode(root, node, true), root.GetText().ToString()) {FileName = "code.cs"},
+                    new VisualizationBrokerInfo("roslyn.SyntaxTreeWithTokens", "Roslyn Syntax Tree With Tokens", 900)
                 );
             }
         }

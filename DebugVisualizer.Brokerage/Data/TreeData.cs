@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace DebugVisualizer.DataExtraction.Data
+namespace DebugVisualizer.Brokerage.Data
 {
     public sealed class Tree : VisualizationData
     {

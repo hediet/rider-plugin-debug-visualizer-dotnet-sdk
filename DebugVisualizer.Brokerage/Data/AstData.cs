@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 
-namespace DebugVisualizer.DataExtraction.Data
+namespace DebugVisualizer.Brokerage.Data
 {
-    public sealed class Ast : VisualizationData
+    public sealed class AstData : VisualizationData
     {
-        public Ast(AstTreeNode root, string text)
+        public AstData(AstTreeNode root, string text)
         {
             Root = root;
             Text = text;

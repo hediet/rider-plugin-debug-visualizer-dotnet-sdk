@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace DebugVisualizer.DataExtraction.Data
+namespace DebugVisualizer.Brokerage.Data
 {
     public sealed class PlotlyData : VisualizationData
     {
