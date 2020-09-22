@@ -22,15 +22,27 @@ namespace ConsoleAppDemo
             AstDemo();
         }
 
+        static PlotlyData Plot(Func<double, double, double> fn)
+        {
+            var plot = new PlotlyPlotData() {Y = new List<double>(), X = new List<double>(), Z = new List<double>(), Type = PlotType.Mesh3D};
+            var plotly = new PlotlyData(new[] {plot});
+            
+            for (var i = 0.0; i < 10; i += 0.1)
+            {
+                for (var j = 0.0; j < 10; j += 0.1)
+                {
+                    plot.X.Add(i);
+                    plot.Y.Add(j);
+                    plot.Z.Add(fn(i, j));
+                }
+            }
+            return plotly;
+        }
+        
         static void PlotlyDemo()
         {
-            var numbers = new List<double>();
-            var plot = new PlotlyPlotData() {Y = numbers};
-            var plotly = new PlotlyData(new[] {plot});
-            for (var i = 0; i < 100; i++)
-            {
-                numbers.Add(Math.Sin(i));
-            }
+            // Visualize `data` here!
+            var data = Plot((i, j) => Math.Sin(i) + Math.Sin(j));
         }
 
         static void LinkedListDemo()
@@ -45,7 +57,7 @@ namespace ConsoleAppDemo
 
         static void ListDemo()
         {
-            var data = new ListData();
+            var data = new TableData();
 
             for (var i = 0; i < 100000; i++)
             {
