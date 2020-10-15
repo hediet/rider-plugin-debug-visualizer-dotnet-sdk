@@ -20,6 +20,10 @@ namespace DebugVisualizer.Brokerage
             MainVisualizationBroker.DataExtractors.Add(new GetVisualizationVisualizationBroker());
             MainVisualizationBroker.DataExtractors.Add(new JsonVisualizationBroker());
             MainVisualizationBroker.DataExtractors.Add(new VisualizationDataVisualizationBroker());
+            MainVisualizationBroker.DataExtractors.Add(new ILVisualizationBroker());
+            MainVisualizationBroker.DataExtractors.Add(new NumberArrayVisualizationBroker());
+            MainVisualizationBroker.DataExtractors.Add(new ClassHierarchyVisualizationBroker());
+            MainVisualizationBroker.DataExtractors.Add(new TabularDataVisualizationBroker());
         }
 
         // global::DebugVisualizer.Brokerage.VisualizationBrokerService.BrokerJson(3, "{ \"preferredDataExtractorId\": \"myExtractor\" }")

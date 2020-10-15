@@ -8,6 +8,17 @@ namespace DebugVisualizer.Brokerage.Data
 {
     public sealed class PlotlyData : VisualizationData
     {
+        public static PlotlyData From(IEnumerable<double> values)
+        {
+            return new PlotlyData(new[]
+            {
+                new PlotlyPlotData()
+                {
+                    Y = values.ToList()
+                }
+            });
+        }
+        
         public override string[] Tags => new string[] { "plotly" };
 
         [JsonProperty("data")]
